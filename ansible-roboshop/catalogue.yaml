@@ -1,0 +1,11 @@
+- name: mongodb
+  hosts: mongodb
+  become: yes
+  tasks:
+  - name: disable old nodejs and enable new js
+    ansible.builtin.shell: dnf module disable nodejs -y ; dnf module enable nodejs:18 -y
+
+  - name: Install nodejs
+    ansible.builtin.dnf:
+      name: nodejs
+      state: present
