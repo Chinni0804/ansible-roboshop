@@ -1,0 +1,15 @@
+- name: web
+  hosts: cweb
+  become: yes
+  tasks:
+  - name: install nginx
+    ansible.builtin.package:
+      name: nginx
+      state: present
+  
+  - name: Enable nginx and start
+    ansible.builtin.service:
+      name: nginx
+      state: restarted
+      enabled: yes
+
