@@ -60,9 +60,9 @@
     ansible.builtin.command: mongo --host mongodb.cbdhaba.online --quiet --eval 'db = db.getSiblingDB("catalogue"); db.products.count()'
     register: product_count
 
-  - name: print he count
-    ansible.builtin.debug:
-      msg: "product_count: {{product_count}}"
+  #- name: print he count
+  #  ansible.builtin.debug:
+   #   msg: "product_count: {{product_count}}"
 
   - name: load catalogue data
     ansible.builtin.command: mongo --host mongodb.cbdhaba.online < /app/schema/catalogue.js
@@ -73,6 +73,6 @@
       name: catalogue
       state: restarted
       enabled: yes
-       
+
 
 
