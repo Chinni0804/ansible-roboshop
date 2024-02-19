@@ -2,29 +2,24 @@
   hosts: catalogue
   become: yes
   tasks:
-  - name: disable old nodejs and enable nodejs
+  - name: disable old nodejs and enable new js
     ansible.builtin.shell: dnf module disable nodejs -y ; dnf module enable nodejs:18 -y
 
   - name: Install nodejs
     ansible.builtin.dnf:
-      name: nodejs 
+      name: nodejs
       state: present
 
   - name: create roboshop user
     ansible.builtin.user:
       name: roboshop
 
-  - name: Recursively remove app directory
-    ansible.builtin.file:
-      path: /app
-      state: absent
-
   - name: create app directory
     ansible.builtin.file:
       path: /app
       state: directory
 
-  - name: download catalogue application
+  - name: download catalogue
     ansible.builtin.get_url:
       url: https://roboshop-builds.s3.amazonaws.com/catalogue.zip
       dest: /tmp
@@ -45,36 +40,39 @@
       src: catalogue.service
       dest: /etc/systemd/system/catalogue.service
 
-  - name: deamon realod and start
+  - name: deamon reload and start 
     ansible.builtin.systemd_service:
       daemon_reload: true
 
-  # let's start after the data is loaded
+  # lets start after the data reload
 
-  - name: Copy mongodb repo
+  - name: mongod repo Copy
     ansible.builtin.copy:
-      src: mongodb.repo
-      dest: /etc/yum.repos.d/mongodb.repo
+      src: mongo.repo
+      dest: /etc/yum.repos.d/mongo.repo
 
   - name: Install mongodb client
     ansible.builtin.package:
       name: mongodb-org-shell
       state: present
-
+  
   - name: get the categories count
-    ansible.builtin.command:  mongo --host mongodb.cbdhaba.online --quiet --eval 'db = db.getSiblingDB("catalogue"); db.products.count()'
+    ansible.builtin.command: mongo --host mongodb.cbdhaba.online --quiet --eval 'db = db.getSiblingDB("catalogue"); db.products.count()'
     register: product_count
 
-  # - name: print the count
-  #   ansible.builtin.debug:
-  #     msg: "product count: {{product_count}}"
+  #- name: print he count
+  #  ansible.builtin.debug:
+   #   msg: "product_count: {{product_count}}"
 
   - name: load catalogue data
     ansible.builtin.command: mongo --host mongodb.cbdhaba.online < /app/schema/catalogue.js
-    when: product_count.stdout == "0" # keep double quotes
+    when: product_count.stdout == "0"
 
   - name: start and enable catalogue
     ansible.builtin.service:
       name: catalogue
       state: restarted
       enabled: yes
+
+
+
